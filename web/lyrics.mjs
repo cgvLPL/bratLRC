@@ -1,4 +1,4 @@
-const stamp='(\\d+):([0-5]\\d)(?:\\.(\\d{1,3}))?';
+const stamp='(\\d+):([0-5]\\d)(?:[.,:]([0-9]{1,3}))?';
 const seconds=m=>Number(m[1])*60+Number(m[2])+Number('0.'+(m[3]||'0'));
 export function parseLrc(text,duration,shift=0){
  if(!Number.isFinite(duration)||duration<=0||!Number.isFinite(shift))throw Error('Invalid audio duration or timing shift.');
@@ -12,7 +12,7 @@ export function parseLrc(text,duration,shift=0){
   for(const m of stamps)rows.push({start:seconds(m)+shift,content});
  }
  rows.sort((a,b)=>a.start-b.start);
- if(!rows.some(r=>r.content))throw Error('No timed lyrics found. Use [00:01.50]Your lyric here.');
+ if(!rows.some(r=>r.content))throw Error('No timed lyrics found. Use [00:15.24] Your lyric here.');
  if(rows.length>3000)throw Error('Maximum 3,000 lyric lines.');
  const events=new Map([[0,[]]]);
  for(let i=0;i<rows.length;i++){
