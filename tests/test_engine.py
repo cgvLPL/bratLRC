@@ -11,6 +11,13 @@ class LyricsTests(unittest.TestCase):
         self.assertIn((1.6, ['hello']), events)
         self.assertIn((3.15, ['hello']), events)
 
+    def test_common_line_synced_formats(self):
+        events = parse_lrc('[00:15.24] first line\n[00:21,38] second line\n[00:27:85] third line\n[00:35.30] ', 40)
+        self.assertIn((15.24, ['first']), events)
+        self.assertIn((21.38, ['second']), events)
+        self.assertIn((27.85, ['third']), events)
+        self.assertEqual(events[-1], (35.3, []))
+
     def test_enhanced(self):
         events = parse_lrc('[00:01]<00:01>hello <00:02.5>world\n[00:04]', 5)
         self.assertIn((2.5, ['hello','world']), events)
