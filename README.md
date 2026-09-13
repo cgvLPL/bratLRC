@@ -60,13 +60,16 @@ The local interface listens only on loopback and is for one user. It is not a pr
 
 ## Timing
 
-Standard LRC (each line clears the previous phrase):
+Standard line-synced LRC is accepted as-is. A file like this works directly — no conversion to enhanced word timestamps is required:
 
 ```text
-[00:01.50]let the words
-[00:04.20]come to life
-[00:07.00]
+[00:15.24] Your first lyric line
+[00:21.38] Your next lyric line
+[00:27.85] Another lyric line
+[00:35.30]
 ```
+
+The parser accepts the common fractional timestamp variants `[mm:ss.xx]`, `[mm:ss,xx]`, and `[mm:ss:xx]`, as well as millisecond precision. Each timestamped line clears the previous phrase.
 
 Words are distributed through 85% of the line interval; this is estimated timing, not vocal recognition. Blank timed lines clear the canvas. The final line lasts until the audio ends; add a final blank timestamp to end it sooner. Multiple line timestamps and `[offset:100]` (milliseconds) are supported. Positive offsets and timing shifts delay lyrics.
 
