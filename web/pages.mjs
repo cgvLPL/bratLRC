@@ -37,7 +37,7 @@ $('form').addEventListener('submit',async event=>{
   ffmpeg=new FFmpeg();
   ffmpeg.on('log',({message})=>{lastLog=message;});
   ffmpeg.on('progress',({time})=>{if(encoding&&!cancelled)status('Encoding MP4… keep this tab open.',Math.min(99,40+time/1e6/duration*59));});
-  await ffmpeg.load({coreURL:new URL('./vendor/ffmpeg/index.js',import.meta.url).href.replace('/ffmpeg/index.js','/core/ffmpeg-core.js'),wasmURL:new URL('./vendor/core/ffmpeg-core.wasm',import.meta.url).href});check();
+  await ffmpeg.load({coreURL:new URL('./vendor/core/ffmpeg-core.js',import.meta.url).href,wasmURL:new URL('./vendor/core/ffmpeg-core.wasm',import.meta.url).href});check();
   await ffmpeg.writeFile('audio.mp3',new Uint8Array(await audio.arrayBuffer()));check();
   const canvas=document.createElement('canvas'),listing=['ffconcat version 1.0'];
   for(let i=0;i<events.length;i++){
