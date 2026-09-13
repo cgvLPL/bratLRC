@@ -1,5 +1,9 @@
 # bratLRC
 
+<p align="center">
+  <img src="static/bratlrc-logo.png" alt="bratLRC — acid-green lettering with rough oval rings on black" width="720">
+</p>
+
 MP3 + synced LRC → a minimal, word-build lyric video inspired by the supplied reference. Black text, white background, generous spacing, and a fresh phrase on every lyric line. Exports an H.264/AAC MP4 at 30 FPS. Square 1080×1080, portrait 1080×1920, and landscape 1920×1080.
 
 ## Use entirely on GitHub (no installation)

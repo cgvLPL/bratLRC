@@ -51,6 +51,8 @@ class Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         if path == '/':
             return self.reply(200, (ROOT/'static/index.html').read_bytes().replace(b'__TOKEN__', TOKEN.encode()), 'text/html; charset=utf-8')
+        if path == '/bratlrc-logo.png':
+            return self.reply(200, (ROOT/'static/bratlrc-logo.png').read_bytes(), 'image/png')
         if path in ['/app.js','/style.css']:
             return self.reply(200, (ROOT/'static'/path[1:]).read_bytes(), 'text/javascript' if path.endswith('.js') else 'text/css')
         match = re.fullmatch(r'/api/jobs/([a-f0-9]{24})(/download)?', path)
