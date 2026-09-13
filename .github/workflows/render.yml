@@ -1,0 +1,50 @@
+name: Render lyric video
+on:
+  push:
+    paths:
+      - 'media/**'
+  workflow_dispatch:
+    inputs:
+      audio:
+        description: 'MP3 path in this repository'
+        default: 'media/track.mp3'
+        required: true
+      lyrics:
+        description: 'LRC path in this repository'
+        default: 'media/lyrics.lrc'
+        required: true
+      format:
+        type: choice
+        options: [square, portrait, landscape]
+        default: square
+      shift:
+        description: 'Timing shift in seconds (positive = later)'
+        default: '0'
+permissions:
+  contents: read
+jobs:
+  render:
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip render]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - run: pip install -r requirements.txt
+      - name: Render MP4
+        env:
+          AUDIO: ${{ inputs.audio || 'media/track.mp3' }}
+          LYRICS: ${{ inputs.lyrics || 'media/lyrics.lrc' }}
+          FORMAT: ${{ inputs.format || 'square' }}
+          SHIFT: ${{ inputs.shift || '0' }}
+        run: python render.py --audio "$AUDIO" --lyrics "$LYRICS" --format "$FORMAT" --shift "$SHIFT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lyric-video
+          path: output/lyrics.mp4
+          if-no-files-found: error
+          retention-days: 7

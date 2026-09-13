@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+output/
+*.mp3
+*.mp4
+!media/.gitkeep
