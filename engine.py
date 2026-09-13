@@ -8,7 +8,7 @@ import re
 import subprocess
 from PIL import Image, ImageDraw, ImageFont
 
-STAMP = r'(\d+):([0-5]\d)(?:\.(\d{1,3}))?'
+STAMP = r'(\d+):([0-5]\d)(?:[.,:]([0-9]{1,3}))?'
 LINE = re.compile(r'\[' + STAMP + r'\]')
 WORD = re.compile(r'<' + STAMP + r'>')
 SIZES = {'square': (1080, 1080), 'portrait': (1080, 1920), 'landscape': (1920, 1080)}
@@ -31,7 +31,7 @@ def parse_lrc(text, duration, shift=0):
             rows.append((seconds(stamp) + shift, content))
     rows.sort(key=lambda row: row[0])
     if not rows or not any(content for _, content in rows):
-        raise ValueError('No timed lyrics found. Use [00:01.50]Your lyric here.')
+        raise ValueError('No timed lyrics found. Use [00:15.24] Your lyric here.')
     if len(rows) > 3000:
         raise ValueError('Maximum 3,000 lyric lines.')
     events = {0.0: []}
