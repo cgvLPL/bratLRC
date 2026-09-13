@@ -1,0 +1,12 @@
+{
+  "name": "bratlrc",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node scripts/build-pages.mjs",
+    "test:web": "node --test tests/web.test.mjs",
+    "test:browser": "node tests/browser.mjs"
+  },
+  "dependencies": {"@ffmpeg/ffmpeg": "0.12.15", "@ffmpeg/core": "0.12.10"},
+  "devDependencies": {"playwright": "1.51.1"}
+}

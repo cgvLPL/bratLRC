@@ -6,6 +6,29 @@
 
 MP3 + synced LRC → a minimal, word-build lyric video inspired by the supplied reference. Black text, white background, generous spacing, and a fresh phrase on every lyric line. Exports an H.264/AAC MP4 at 30 FPS. Square 1080×1080, portrait 1080×1920, and landscape 1920×1080.
 
+## Live browser app (GitHub Pages)
+
+**[Open bratLRC](https://cgvLPL.github.io/bratLRC/)** after the **Deploy app to GitHub Pages** workflow succeeds.
+
+Choose an MP3 and LRC, set the look, and generate an MP4 directly in your browser. The app keeps the same logo and reference-inspired style. Files are not uploaded to a server. The first export loads a ~31 MB single-thread FFmpeg WebAssembly engine from this site's own assets. No external CDN or cross-origin isolation is required.
+
+Browser limits: 50 MB audio, 500 KB lyrics, up to 10 minutes. Rendering can take longer than the track and uses substantial device memory; keep the tab open. Cancel stops the worker. Use the Actions renderer below for longer tracks or low-memory phones. Download your MP4 before leaving the page.
+
+### Pages setup (once per repository)
+
+In **Settings → Pages → Build and deployment → Source**, select **GitHub Actions**. Then run **Actions → Deploy app to GitHub Pages → Run workflow**. Subsequent changes to browser assets on `main` automatically test and deploy. The workflow verifies a real browser-generated MP4 before publishing. Pages must be enabled by a repository administrator; the workflow's normal token cannot enable it for the first time.
+
+### Build the browser app locally
+
+```bash
+npm install
+npm run test:web
+npm run build
+python -m http.server 8080 --directory dist
+```
+
+Open `http://localhost:8080`. The `dist/` folder contains only static assets and is separate from the Python interface. FFmpeg dependencies are copied into the deployment during the build. See [ffmpeg.wasm](https://ffmpegwasm.netlify.app/docs/getting-started/usage/) for the browser engine and [GitHub's Pages workflow guide](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+
 ## Use entirely on GitHub (no installation)
 
 1. Open `media` in the repository and choose **Add file → Upload files**.
@@ -15,7 +38,7 @@ MP3 + synced LRC → a minimal, word-build lyric video inspired by the supplied 
 
 To choose portrait/landscape, different filenames, or a timing shift, open **Actions → Render lyric video → Run workflow**. Audio and lyrics must already be committed in the repository. Artifacts are kept for seven days. GitHub Actions usage counts toward your account's runner allowance. A missing source file fails the run with an error; upload both before rendering. Add `[skip render]` to a media commit message to skip the automatic render.
 
-This is a repository app with an Actions renderer and an optional local upload interface. It does not deploy a public website or register a GitHub OAuth App. GitHub Pages cannot run the Python/FFmpeg backend.
+The repository includes a GitHub Pages browser app, an Actions renderer, and an optional local Python interface. It does not register a GitHub OAuth App. The Pages app runs its video engine in the browser; the Python backend is used only by local and Actions rendering.
 
 ## Local upload interface
 

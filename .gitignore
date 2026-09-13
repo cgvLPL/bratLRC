@@ -5,3 +5,6 @@ output/
 *.mp3
 *.mp4
 !media/.gitkeep
+node_modules/
+dist/
+.test-output/
