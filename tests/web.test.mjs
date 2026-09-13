@@ -6,6 +6,13 @@ test('fractional, repeated and offset timestamps',()=>{
  assert.deepEqual(events.find(e=>e[0]===1.6),[1.6,['hello']]);
  assert.deepEqual(events.find(e=>e[0]===3.15),[3.15,['hello']]);
 });
+test('common line-synced LRC formats are accepted',()=>{
+ const events=parseLrc('[00:15.24] first line\n[00:21,38] second line\n[00:27:85] third line\n[00:35.30] ',40);
+ assert.deepEqual(events.find(e=>e[0]===15.24),[15.24,['first']]);
+ assert.deepEqual(events.find(e=>e[0]===21.38),[21.38,['second']]);
+ assert.deepEqual(events.find(e=>e[0]===27.85),[27.85,['third']]);
+ assert.deepEqual(events.at(-1),[35.3,[]]);
+});
 test('enhanced lyrics and blank clear',()=>{
  const events=parseLrc('[00:01]<00:01>hello <00:02.5>world\n[00:04]',5);
  assert.deepEqual(events.find(e=>e[0]===2.5),[2.5,['hello','world']]);
