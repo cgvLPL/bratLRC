@@ -34,6 +34,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --ignore-scripts
+      - run: node --check static/enhance.js
       - run: npm run test:web
       - run: npm run build
       - uses: actions/configure-pages@v5
