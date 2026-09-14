@@ -1,11 +1,12 @@
 (()=>{
  const $=id=>document.getElementById(id);
- const els={audio:$('enhance-audio'),lrc:$('enhance-lrc'),player:$('enhance-player'),lines:$('enhance-lines'),status:$('enhance-status'),current:$('enhance-current'),auto:$('enhance-auto'),tap:$('enhance-tap'),prev:$('enhance-prev'),next:$('enhance-next'),minus:$('enhance-minus'),plus:$('enhance-plus'),download:$('enhance-download')};
+ const els={audio:$('enhance-audio'),lrc:$('enhance-lrc'),player:$('enhance-player'),lines:$('enhance-lines'),status:$('enhance-status'),current:$('enhance-current'),auto:$('enhance-auto'),autoToggle:$('enhance-auto-toggle'),tap:$('enhance-tap'),prev:$('enhance-prev'),next:$('enhance-next'),minus:$('enhance-minus'),plus:$('enhance-plus'),download:$('enhance-download')};
  if(!els.audio)return;
  const stamp='(\\d+):([0-5]\\d)(?:[.,:]([0-9]{1,3}))?';
  let rows=[],meta=[],cursor={line:0,word:0},audioURL=null,downloadURL=null;
  const sec=m=>Number(m[1])*60+Number(m[2])+Number('0.'+(m[3]||'0'));
  const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
+ const autoEnabled=()=>!els.autoToggle||els.autoToggle.value!=='off';
  function fmt(value){
   const t=Math.max(0,Number(value)||0),m=Math.floor(t/60),s=t-m*60;
   return `${String(m).padStart(2,'0')}:${s.toFixed(2).padStart(5,'0')}`;
@@ -15,6 +16,13 @@
   if(Number.isFinite(next))return next;
   if(Number.isFinite(els.player.duration))return els.player.duration;
   return rows[i].start+Math.max(3,rows[i].words.length*.55);
+ }
+ function seedManualTimes(){
+  rows.forEach((row,i)=>{
+   if(!row.words.length){row.times=[];return;}
+   const end=Math.max(row.start+.01,lineEnd(i)-.01);
+   row.times=row.words.map((_,j)=>clamp(row.start+j*.01,row.start,end));
+  });
  }
  function parseRegular(text){
   const clean=text.replace(/^\uFEFF/,'');
@@ -31,8 +39,9 @@
   if(!found.some(r=>r.words.length))throw Error('No regular timed lyrics found. Expected lines like [00:15.24] Your lyric here.');
   if(found.length>3000)throw Error('Maximum 3,000 lyric lines.');
   rows=found;cursor={line:rows.findIndex(r=>r.words.length),word:0};if(cursor.line<0)cursor.line=0;
-  autoTime(false);render();
-  say(`${rows.length} timed lines loaded. Auto word timing is ready to refine.`);
+  if(autoEnabled())autoTime(false);else seedManualTimes();
+  render();
+  say(autoEnabled()?`${rows.length} timed lines loaded. Auto Time Word is ON and timestamps were generated.`:`${rows.length} timed lines loaded. Auto Time Word is OFF; use Tap word for manual timing.`);
  }
  function autoTime(announce=true){
   rows.forEach((row,i)=>{
@@ -41,7 +50,7 @@
    const step=Math.max(.01,usable/Math.max(1,row.words.length));
    row.times=row.words.map((_,j)=>clamp(row.start+j*step,row.start,Math.max(row.start,end-.01)));
   });
-  if(announce){render();say('Estimated word timestamps generated. Play the audio and use Tap word to refine them.');}
+  if(announce){render();say('Auto Time Word recalculated all estimated word timestamps.');}
  }
  function say(message){els.status.textContent=message;}
  function selected(){const row=rows[cursor.line];return row?.words[cursor.word]!==undefined?{row,word:row.words[cursor.word]}:null;}
@@ -114,12 +123,18 @@
  }
  els.audio.addEventListener('change',()=>{
   if(audioURL)URL.revokeObjectURL(audioURL);const file=els.audio.files?.[0];if(!file)return;
-  audioURL=URL.createObjectURL(file);els.player.src=audioURL;els.player.hidden=false;say('Audio loaded. Add a regular LRC file to start editing.');
+  audioURL=URL.createObjectURL(file);els.player.src=audioURL;els.player.hidden=false;say(autoEnabled()?'Audio loaded. Auto Time Word is ON; add a regular LRC to generate word timing.':'Audio loaded. Auto Time Word is OFF.');
  });
- els.player.addEventListener('loadedmetadata',()=>{if(rows.length)autoTime(false);render();});
+ els.player.addEventListener('loadedmetadata',()=>{if(rows.length&&autoEnabled())autoTime(false);render();if(rows.length&&autoEnabled())say('Audio timing loaded. Auto Time Word recalculated the word timestamps.');});
  els.lrc.addEventListener('change',async()=>{
   try{const file=els.lrc.files?.[0];if(!file)return;if(!/\.lrc$/i.test(file.name))throw Error('Choose a file ending in .lrc.');if(file.size>512000)throw Error('LRC must be under 500 KB.');parseRegular(await file.text());}
   catch(error){rows=[];render();say(error.message);}
+ });
+ if(els.autoToggle)els.autoToggle.addEventListener('change',()=>{
+  if(autoEnabled()){
+   if(rows.length)autoTime(false);
+   render();say(rows.length?'Auto Time Word is ON. Estimated word timestamps were regenerated.':'Auto Time Word is ON. Load an LRC to generate word timestamps automatically.');
+  }else say('Auto Time Word is OFF. Existing timestamps are preserved for manual editing.');
  });
  els.auto.onclick=()=>autoTime();els.tap.onclick=tap;els.prev.onclick=()=>move(-1);els.next.onclick=()=>move(1);els.minus.onclick=()=>nudge(-.05);els.plus.onclick=()=>nudge(.05);els.download.addEventListener('click',()=>setTimeout(exportLrc,0));
  $('enhance-export').onclick=exportLrc;
