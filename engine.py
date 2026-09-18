@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw, ImageFont
 STAMP = r'(\d+):([0-5]\d)(?:[.,:]([0-9]{1,3}))?'
 LINE = re.compile(r'\[' + STAMP + r'\]')
 WORD = re.compile(r'<' + STAMP + r'>')
-SIZES = {'square': (1080, 1080), 'portrait': (1080, 1920), 'landscape': (1920, 1080)}
+SIZES = {'square': (1080, 1080), 'portrait': (1080, 1920), 'landscape': (1920, 1080), 'calendar': (724, 474)}
 
 
 def seconds(match):
@@ -81,10 +81,23 @@ def get_font(size):
     return ImageFont.load_default(size=size)
 
 
-def draw_frame(words, size, font_size=88, foreground='#111111', background='#ffffff'):
+def draw_frame(words, size, font_size=88, foreground='#111111', background='#ffffff', format_name='square'):
     w, h = size
     image = Image.new('RGB', size, background)
     draw = ImageDraw.Draw(image)
+    if format_name == 'calendar':
+        if not words:
+            return image
+        current, counter = words[-1], str(len(words))
+        fs = max(28, round(font_size * w/1080 * 1.25))
+        while True:
+            font = get_font(fs)
+            if draw.textlength(current, font=font) <= w*.45 or fs <= 20:
+                break
+            fs -= 2
+        draw.text((w*.066, h*.49), counter, font=font, fill=foreground, anchor='lm')
+        draw.text((w*.49, h*.49), current, font=font, fill=foreground, anchor='lm')
+        return image
     # Reference placement: upper-middle, left aligned, with generous margins.
     max_width, max_height = w*.60, h*.56
     fs = round(font_size * w/1080)
@@ -131,12 +144,13 @@ def render(audio, text, options, folder, progress=lambda value: None):
     duration = probe(audio)
     events = parse_lrc(text, duration, options.get('shift', 0))
     folder = Path(folder)
-    size = SIZES[options.get('format', 'square')]
+    format_name = options.get('format', 'square')
+    size = SIZES[format_name]
     listing = ['ffconcat version 1.0']
     for i, (start, words) in enumerate(events):
         name = f'frame-{i:05d}.png'
         draw_frame(words, size, options.get('font_size', 88), options.get('foreground', '#111111'),
-                   options.get('background', '#ffffff')).save(folder/name)
+                   options.get('background', '#ffffff'), format_name).save(folder/name)
         end = events[i+1][0] if i+1 < len(events) else duration
         listing.extend([f"file '{name}'", 'option framerate 30', f'duration {end-start:.8f}'])
         progress(round(40*(i+1)/len(events)))
