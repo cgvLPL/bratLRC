@@ -2,10 +2,13 @@ import {parseLrc,drawFrame} from './lyrics.mjs';
 const $=id=>document.getElementById(id);
 let ffmpeg=null,cancelled=false,busy=false,downloadURL=null,count=0;
 const options=()=>Object.fromEntries(['format','font_size','foreground','background','shift'].map(id=>[id,$(id).value]));
+const specs={square:'1080×1080 · 30 FPS',portrait:'1080×1920 · 30 FPS',landscape:'1920×1080 · 30 FPS',calendar:'724×474 · 30 FPS'};
 function preview(){if(!busy)drawFrame($('canvas'),['let','the','words','come','to','life'].slice(0,count),options());}
+function updateSpec(){if($('preview-spec'))$('preview-spec').textContent=specs[$('format').value]||'30 FPS';}
 setInterval(()=>{count=(count+1)%8;preview();},550);
-for(const id of ['format','font_size','foreground','background'])$(id).addEventListener('input',preview);
-preview();
+for(const id of ['font_size','foreground','background'])$(id).addEventListener('input',preview);
+$('format').addEventListener('change',()=>{if($('format').value==='calendar'){$('foreground').value='#000800';$('background').value='#ff361c';}updateSpec();preview();});
+updateSpec();preview();
 const status=(message,progress)=>{$('status').textContent=message;if(progress!==undefined)$('progress').value=progress;};
 const check=()=>{if(cancelled)throw Error('Render cancelled.');};
 $('cancel').addEventListener('click',()=>{cancelled=true;ffmpeg?.terminate();});
