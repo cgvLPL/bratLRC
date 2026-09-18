@@ -88,7 +88,7 @@ class Handler(BaseHTTPRequestHandler):
             if len(fields['lyrics']) > 512000: raise ValueError('LRC files must be smaller than 500 KB.')
             lyrics = fields['lyrics'].decode('utf-8-sig')
             options = json.loads(fields.get('options', b'{}'))
-            if options.get('format') not in ['square','portrait','landscape']: raise ValueError('Invalid aspect ratio.')
+            if options.get('format') not in ['square','portrait','landscape','calendar']: raise ValueError('Invalid aspect ratio.')
             for key in ['foreground','background']:
                 if not re.fullmatch(r'#[a-fA-F0-9]{6}', options.get(key,'')): raise ValueError('Invalid color.')
             options['font_size'] = int(options.get('font_size',88))
