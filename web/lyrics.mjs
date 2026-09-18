@@ -44,10 +44,21 @@ export function parseLrc(text,duration,shift=0){
  if(result.length>5000||result.reduce((n,e)=>n+e[1].length,0)>150000)throw Error('Lyrics are too large. Use the GitHub Actions renderer.');
  return result;
 }
-export const sizes={square:[1080,1080],portrait:[1080,1920],landscape:[1920,1080]};
+export const sizes={square:[1080,1080],portrait:[1080,1920],landscape:[1920,1080],calendar:[724,474]};
 export function drawFrame(canvas,words,options){
  const [w,h]=sizes[options.format];canvas.width=w;canvas.height=h;
  const ctx=canvas.getContext('2d');ctx.fillStyle=options.background;ctx.fillRect(0,0,w,h);
+ if(options.format==='calendar'){
+  if(!words.length)return;
+  const current=words.at(-1),counter=String(words.length);
+  let fs=Math.max(28,Math.round(Number(options.font_size)*w/1080*1.25));
+  ctx.textBaseline='middle';ctx.fillStyle=options.foreground;
+  const maxRight=w*.45;
+  do{ctx.font=`${fs}px Arial`;if(ctx.measureText(current).width<=maxRight||fs<=20)break;fs-=2;}while(true);
+  ctx.fillText(counter,w*.066,h*.49);
+  ctx.fillText(current,w*.49,h*.49);
+  return;
+ }
  let fs=Math.round(Number(options.font_size)*w/1080),rows;
  do{
   ctx.font=`${fs}px Arial`;rows=[];let row=[],x=0;
