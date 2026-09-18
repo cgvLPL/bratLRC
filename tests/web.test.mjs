@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {parseLrc} from '../web/lyrics.mjs';
+import {parseLrc,sizes} from '../web/lyrics.mjs';
 test('fractional, repeated and offset timestamps',()=>{
  const events=parseLrc('[offset:100]\n[00:01.5][00:03.050]hello world',5);
  assert.deepEqual(events.find(e=>e[0]===1.6),[1.6,['hello']]);
@@ -23,4 +23,8 @@ test('negative shifts preserve active words at zero',()=>{
 });
 test('reject untimed, out-of-range and unordered words',()=>{
  for(const text of ['bad','[00:99]bad','[20:00]late','[00:01]<00:03>a <00:02>b'])assert.throws(()=>parseLrc(text,5));
+});
+
+test('calendar counter preset keeps reference dimensions',()=>{
+ assert.deepEqual(sizes.calendar,[724,474]);
 });
